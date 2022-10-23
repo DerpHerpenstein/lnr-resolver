@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.6.0/web3.min.js" integrity="sha512-+BhnLgfzIDDjssoEWHPmdgWRvbwIEdj0Xfiys7uSqfQWpMEOJ4ymJ88O6B1cB0j+4zjb5GhO+sb/kEicggvUQQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script>
+    const web3Instance = new Web3(ethereum);
+    // NOTE: This is the ABI [application binary interface]
+    // this defines all the functions available in your smart Contract
+    // when you change your smart contract, you will need to update this ABI
+    // when compiled you can find the ABI at build->contracts->MYERC721.json "abi"
+    // To make it more compact, remove the whitespaces by pasting the ABI into https://codebeautify.org/remove-extra-spaces
+    const erc721Abi =
+      [ { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "approved", "type": "address" }, { "indexed": true, "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "operator", "type": "address" }, { "indexed": false, "internalType": "bool", "name": "approved", "type": "bool" } ], "name": "ApprovalForAll", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": true, "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "Transfer", "type": "event" }, { "inputs": [], "name": "_maxSupply", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "approve", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "getApproved", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "operator", "type": "address" } ], "name": "isApprovedForAll", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "name", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "ownerOf", "outputs": [ { "internalType": "address", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "safeTransferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" }, { "internalType": "bytes", "name": "_data", "type": "bytes" } ], "name": "safeTransferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "operator", "type": "address" }, { "internalType": "bool", "name": "approved", "type": "bool" } ], "name": "setApprovalForAll", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" } ], "name": "supportsInterface", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "symbol", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "tokenURI", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "tokenId", "type": "uint256" } ], "name": "transferFrom", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "count", "type": "uint256" } ], "name": "mint", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" } ];
+
+    // NOTE: when you run truffle test, you will need to update this erc721 address
+    let erc721Address = "0xeA367344Ed8DEb3DE732880b7EE8aDCa281935E0"; // local
+    let erc721Contract = new web3Instance.eth.Contract(erc721Abi,erc721Address);
+
+    // users web3 eth wallet
+    let walletAddress = "";
+
+    // create web3 mint transaction
+    $(document).on('click', '#mint_button', async function(){
+      try{
+        let feePerGas = await web3Instance.eth.getGasPrice();
+        let selected = $("#mint_count_select").find(":selected").text();
+
+        let mintToken = await erc721Contract.methods.mint(selected).send({
+              from: walletAddress,
+              maxFeePerGas: Math.max(feePerGas, 2000000000),
+              maxPriorityFeePerGas: 2000000000,
+              type: '0x2',
+            });
+        alert("You have minted " + selected + " tokens");
+      }
+      catch(e){
+        alert(e.message);
+      }
+    });
+
+    // Updates the web3 connect button to show the current state of the web3 connection
+    async function checkWeb3(){
+      if(window.ethereum) {
+        $("#eth_login_button").addClass("is-disabled");
+        $("#eth_login_button").html("Please check web3 wallet");
+
+        //const enabledWeb3 = await ethereum.enable();
+        const currentAccounts = await web3Instance.eth.getAccounts();
+        const account = currentAccounts[0];
+        walletAddress = account;
+
+        if(account){
+          $("#eth_login_button").removeClass("is-disabled");
+          $("#eth_login_button").html("Wallet:" + account.substring(0,6) + "..." + account.slice(account.length-4));
+          $("#eth_login_button").addClass("is-success");
+          $('#web3_content').css("display","");
+        }
+        else{
+          $("#eth_login_button").removeClass("is-disabled");
+          $("#eth_login_button").html("Connect to web3 wallet");
+          $('#web3_content').css("display","none");
+        }
+      }
+      else{
+        $("#eth_login_button").html("Error loading Web3");
+        $("#eth_login_button").addClass("is-disabled");
+        $('#web3_content').css("display","none");
+      }
+    }
+
+    // used for web3 login with web3.js
+    $(document).on('click', '#eth_login_button', function(){
+      try{
+        ethereum.request({ method: 'eth_requestAccounts' });
+      }
+      catch(err){
+        $("#eth_login_button").html("Web3 wallet not available");
+      }
+      checkWeb3();
+    });
+
+    // NOTE: this checkWebAccount checks the web3 account.  if it has been changed it updates it
+    async function checkWebAccount(){
+      try{
+        const currentAccounts = await web3Instance.eth.getAccounts();
+        const account = currentAccounts[0];
+        $("#mint_counter").html("Total Minted:" + ( await erc721Contract.methods.totalSupply().call() )  + "/100")
+        if(account != walletAddress){
+          walletAddress = account;
+          checkWeb3();
+        }
+        setTimeout(checkWebAccount, 500);
+      }
+      catch(err){
+        console.log(err);
+      }
+    }
+    setTimeout(checkWebAccount, 500);
+  </script>
+</head>
+<body>
+  <div>
+      <div class="container">
+        <main class="main-content">
+          <section class="topic">
+            <button id="eth_login_button" type="button" class="nes-btn" style="margin-bottom:1em">Connect Wallet</button>
+          </section>
+
+          <section id="web3_content" class="topic">
+            <section class="topic">
+              <section id="mint_section" class="container-lg paper">
+                <h3 class="title">Mint an NFT!</h3>
+                <div style="width:150px; display:inline-block;">
+                  <div class="nes-select">
+                    <select required="" id="mint_count_select">
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="max-width:200px; display:inline-block;">
+                  <button id="mint_button" type="button" class="nes-btn is-warning">Mint</button>
+                </div>
+                <div style="width:100%; margin-top:1em"><p id="mint_counter"></p></div>
+
+                <h5>Note: During development, remeber the following</h5>
+                <ul>
+                  <li>Update test/test.js line 5 (metamaskAddress) to ensure you send yourself some ETH on the testnet</li>
+                  <li>Update views/pages/mint.ejs line 17 (erc721Address) to ensure that the contract address for minting is using the one generated by truffle test</li>
+                  <li>Update the index.js line 17 (erc721Address) to ensure the contract address the serve JSON is using was the one generated by truffle test</li>
+                  <li>Connect to your metamask wallet (setup metamask if you havent)<b>it may be a good idea to use a seperate browser and an empty metamask account to ensure you dont accidentally do something silly</b></li>
+                  <li>Connect metamask to localhost:8545</li>
+                  <li>Anytime ganache is closed and reopened your nonce is incorrect and you must reset your metamask account: metamask->settings-advanced settings -> reset account</li>
+                </ul>
+              </section>
+            </section>
+        </section>
+        </main>
+        <footer>
+          <p>
+            <a href="https://twitter.com/0xDerpNation" target="_blank" rel="noopener">@0xDerpNation</a>
+          </p>
+        </footer>
+</body>
+</html>
