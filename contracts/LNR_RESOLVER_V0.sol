@@ -3,30 +3,20 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 interface ILNR {
    function owner(bytes32 _name) external view returns(address);
 }
 
-contract LNR_RESOLVER_V0 is Initializable, ReentrancyGuardUpgradeable , OwnableUpgradeable{
+contract LNR_RESOLVER_V0 is Initializable, ReentrancyGuardUpgradeable {
     event NewController(bytes32 indexed name, address indexed controller);
     event NewPrimary(bytes32 indexed name, address indexed primary);
 
-    address public lnrAddress;                          //0x5564886ca2C518d1964E5FCea4f423b41Db9F561
+    address public constant lnrAddress = 0x5564886ca2C518d1964E5FCea4f423b41Db9F561;
     mapping(bytes32 => address) public resolveAddress;  // maps a LNR domain name to an an address
     mapping(bytes32 => address) public controller;      // stores controller for each name, controller or owner can change domain information
     mapping(address => bytes32) public primary;         // stores the primary name of an address
-
-    function initialize() public initializer {
-      __Ownable_init();
-    }
-
-    function updateLNRAddress(address _addr) public onlyOwner {
-      require(lnrAddress == address(0), 'Can only be changed once');
-      lnrAddress = _addr;
-    }
 
     function getResolveAddress(bytes32 _name) public view returns (address){
       return resolveAddress[_name];
