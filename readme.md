@@ -68,7 +68,7 @@ Open 2 terminal windows in the root directory.
 
 In the first terminal, launch ganache with a mnemonic so you get repeatable addresses:
    ```sh
-   ganache -e 10000  -m "nice fetch insect exact south wheel stay pepper section piece tenant select"
+   ganache -e 10000  -m "nice fetch insect exact south wheel stay pepper section piece tenant select" --fork
    ```
 
 In the second terminal run:
