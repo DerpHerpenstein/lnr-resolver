@@ -9,7 +9,7 @@ interface ILNR {
    function owner(bytes32 _name) external view returns(address);
 }
 
-contract LNR_RESOLVER_V0 is Initializable, ReentrancyGuardUpgradeable {
+contract LNR_RESOLVER_V0 is ReentrancyGuardUpgradeable {
     event NewController(bytes32 indexed name, address indexed controller);
     event NewPrimary(bytes32 indexed name, address indexed primary);
 
