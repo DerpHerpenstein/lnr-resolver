@@ -26,9 +26,9 @@ contract LNR_RESOLVER_V0 is Initializable, ReentrancyGuardUpgradeable {
       bytes memory domainBytes = bytes(_domain);
       require(domainBytes.length < 36, "Too long"); // bytes32 + .og = 35 bytes
       require(domainBytes[domainBytes.length-1] == 0x67 && domainBytes[domainBytes.length-2] == 0x6F && domainBytes[domainBytes.length-3] == 0x2E, "invalid domain"); // must end in .og
-      domainBytes[domainBytes.length-1] = 0x00;
-      domainBytes[domainBytes.length-2] = 0x00;
-      domainBytes[domainBytes.length-3] = 0x00;
+      delete domainBytes[domainBytes.length-1];
+      delete domainBytes[domainBytes.length-2];
+      delete domainBytes[domainBytes.length-3];
       uint i;
       // ensures there are no other periods in the name, it must be a primary and not a subdomain!
       for(;i<domainBytes.length-3;){
@@ -53,7 +53,7 @@ contract LNR_RESOLVER_V0 is Initializable, ReentrancyGuardUpgradeable {
     // setting the primary with map the name to the primary address and the address to the name
     function setPrimary(bytes32 _name) public nonReentrant {
       verifyIsDomainOwner(_name, msg.sender);
-      primary[resolveAddress[_name]] = 0x00;   // remove primary from old primary address
+      delete primary[resolveAddress[_name]];   // remove primary from old primary address
       primary[msg.sender] = _name;             // set new primary
       resolveAddress[_name] = msg.sender;      // set new resolver
       emit NewPrimary(_name, msg.sender);
