@@ -1,15 +1,39 @@
 // SPDX-License-Identifier: MIT
 // By Derp Herpenstein (https://www.derpnation.xyz, https://www.avime.com)
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 interface ILNR {
    function owner(bytes32 _name) external view returns(address);
 }
 
-contract LNR_RESOLVER_V0 is ReentrancyGuardUpgradeable {
+///////////////////////////////////////
+//       ***ONCE DEPLOYED***         //
+// DO NOT CHANGE ANYTHING BETWEEN    //
+// LINE 19 and  LINE 43              //
+///////////////////////////////////////
+contract LNR_RESOLVER_V0 is Initializable, OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize() initializer public {
+        __Ownable_init();
+        __UUPSUpgradeable_init();
+    }
+
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        onlyOwner
+        override
+    {}
+
     event NewController(bytes32 indexed name, address indexed controller);
     event NewPrimary(bytes32 indexed name, address indexed primary);
 
@@ -17,6 +41,11 @@ contract LNR_RESOLVER_V0 is ReentrancyGuardUpgradeable {
     mapping(bytes32 => address) public resolveAddress;  // maps a LNR domain name to an an address
     mapping(bytes32 => address) public controller;      // stores controller for each name, controller or owner can change domain information
     mapping(address => bytes32) public primary;         // stores the primary name of an address
+
+///////////////////////////////////////
+// DO NOT CHANGE ANYTHING BETWEEN    //
+// LINE 19 and  LINE 43              //
+///////////////////////////////////////
 
     function getResolveAddress(bytes32 _name) public view returns (address){
       return resolveAddress[_name];

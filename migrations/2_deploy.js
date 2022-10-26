@@ -1,6 +1,5 @@
-// https://github.com/icon-project/devportal/blob/master/btp-gitbook/Contract-Upgradeability-Solidity.md
-// https://github.com/OpenZeppelin/openzeppelin-upgrades/blob/master/packages/plugin-truffle/README.md
-// https://github.com/OpenZeppelin/openzeppelin-upgrades
+// UUPS IS more gas efficient, use this proxy type
+//https://docs.openzeppelin.com/contracts/4.x/api/proxy#UUPSUpgradeable
 
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 
