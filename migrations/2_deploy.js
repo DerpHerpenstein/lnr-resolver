@@ -3,7 +3,7 @@
 
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 
-const lnrResolverContract = artifacts.require('LNR_RESOLVER_V0');
+const lnrResolverContract = artifacts.require('LNR_RESOLVER_V1');
 
 module.exports = async function (deployer) {
   const resolverInstance = await deployProxy(lnrResolverContract, { deployer });

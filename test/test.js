@@ -4,7 +4,7 @@ const lnrAbi = [{"constant": true,"inputs": [{"name": "_owner","type": "address"
 
 const lnrAddress = "0x5564886ca2C518d1964E5FCea4f423b41Db9F561";
 
-const lnrResolverInstance = artifacts.require("LNR_RESOLVER_V0");
+const lnrResolverInstance = artifacts.require("LNR_RESOLVER_V1");
 
 // note: change this to your metamask address so that you can test in a browser
 let zeroAddress = '0x0000000000000000000000000000000000000000';
@@ -123,5 +123,28 @@ contract("LNR RESOLVER - Test LNR RESOLVER", async accounts =>{
   it("resolve('abcabcabcabcabcabcabcabcabcabcab..og') - should revert as too long", async () => {
     let lnrResolverContract = await lnrResolverInstance.deployed();
     await truffleAssert.reverts(lnrResolverContract.resolve.call("abcabcabcabcabcabcabcabcabcabcab..og", {from:accounts[0]}), "Too long");
+  });
+
+  it("unsetPrimary() - should set the resolve[address] and the primary[bytes32] to 0x00", async () => {
+    let lnrResolverContract = await lnrResolverInstance.deployed();
+    let primary = await lnrResolverContract.primary(accounts[2]);
+    expect(primary).to.eql(web3.utils.padRight(web3.utils.utf8ToHex("dderp"),64));
+    let resolveAddress = await lnrResolverContract.resolveAddress(web3.utils.padRight(web3.utils.utf8ToHex("dderp")));
+    expect(resolveAddress).to.eql(accounts[2]);
+    let unsetPrimary = await lnrResolverContract.unsetPrimary({from:accounts[2]});
+    expect(unsetPrimary.receipt.status).to.eql(true);
+    primary = await lnrResolverContract.primary(accounts[2]);
+    expect(primary).to.eql(web3.utils.padRight("0x00",64));
+    resolveAddress = await lnrResolverContract.resolveAddress(web3.utils.padRight(web3.utils.utf8ToHex("dderp")));
+    expect(resolveAddress).to.eql(zeroAddress);
+  });
+
+  it("setPrimary(dderp]) from a[0] - owner changes primary, should resolve name to a[0] and a[0] to name", async () => {
+    let lnrResolverContract = await lnrResolverInstance.deployed();
+    await lnrResolverContract.setPrimary(web3.utils.utf8ToHex("dderp"),{from:accounts[0]});
+    let identity = await lnrResolverContract.getResolveAddress.call(web3.utils.utf8ToHex("dderp"), {from:accounts[0]});
+    expect(identity).to.eql(accounts[0]);
+    let primary = await lnrResolverContract.primary.call(accounts[0], {from:accounts[0]});
+    expect(primary).to.eql(web3.utils.padRight(web3.utils.utf8ToHex("dderp"),64)); // must pad to 64 bytes because the hex is shown
   });
 });
