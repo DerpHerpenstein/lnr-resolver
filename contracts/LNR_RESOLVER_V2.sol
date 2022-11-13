@@ -1029,7 +1029,7 @@ interface ILNR {
 // DO NOT CHANGE ANYTHING BETWEEN    //
 // LINE 19 and  LINE 43              //
 ///////////////////////////////////////
-contract LNR_RESOLVER_V1 is Initializable, OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
+contract LNR_RESOLVER_V2 is Initializable, OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -1080,8 +1080,10 @@ contract LNR_RESOLVER_V1 is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
     }
 
     // make sure that the _addr is the authorized to make changes (controller or the owner)
-    function verifyIsNameOwner(bytes32 _name, address _addr) public view {
-        require((controller[_name] == _addr) || (ILNR(lnrAddress).owner(_name) == _addr) , "Not yours");
+    function verifyIsNameOwner(bytes32 _name, address _addr) public view returns(bool) {
+        if((controller[_name] == _addr) || (ILNR(lnrAddress).owner(_name) == _addr))
+          return true;
+        return false;
     }
 
     // allow the owner to designate a new controller
@@ -1091,9 +1093,14 @@ contract LNR_RESOLVER_V1 is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
       emit NewController(_name, _controller);
     }
 
+    function unsetController(bytes32 _name) public {
+      setController(_name, address(0));
+    }
+
     // setting the primary with map the name to the primary address and the address to the name
     function setPrimary(bytes32 _name) public nonReentrant {
-      verifyIsNameOwner(_name, msg.sender);
+      require(verifyIsNameOwner(_name, msg.sender), "Not yours");
+      delete resolveAddress[primary[msg.sender]];
       delete primary[resolveAddress[_name]];   // remove primary from old primary address
       primary[msg.sender] = _name;             // set new primary
       resolveAddress[_name] = msg.sender;      // set new resolver
