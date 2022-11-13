@@ -4,7 +4,7 @@ const lnrAbi = [{"constant": true,"inputs": [{"name": "_owner","type": "address"
 
 const lnrAddress = "0x5564886ca2C518d1964E5FCea4f423b41Db9F561";
 
-const lnrResolverInstance = artifacts.require("LNR_RESOLVER_V1");
+const lnrResolverInstance = artifacts.require("LNR_RESOLVER_V2");
 
 // note: change this to your metamask address so that you can test in a browser
 let zeroAddress = '0x0000000000000000000000000000000000000000';
@@ -147,4 +147,59 @@ contract("LNR RESOLVER - Test LNR RESOLVER", async accounts =>{
     let primary = await lnrResolverContract.primary.call(accounts[0], {from:accounts[0]});
     expect(primary).to.eql(web3.utils.padRight(web3.utils.utf8ToHex("dderp"),64)); // must pad to 64 bytes because the hex is shown
   });
+
+  it("verifyIsNameOwner(a[0], dderp) from a[0](owner) - ensure a[0] is nameOwner", async () => {
+    let lnrResolverContract = await lnrResolverInstance.deployed();
+    let verifyIsNameOwner = await lnrResolverContract.verifyIsNameOwner.call(web3.utils.utf8ToHex("dderp"), accounts[0], {from:accounts[0]});
+    expect(verifyIsNameOwner).to.eql(true); // max length
+  });
+
+  it("verifyIsNameOwner(a[2], dderp) from a[2](controller) - ensure a[2] is nameOwner", async () => {
+    let lnrResolverContract = await lnrResolverInstance.deployed();
+    let verifyIsNameOwner = await lnrResolverContract.verifyIsNameOwner.call(web3.utils.utf8ToHex("dderp"), accounts[2], {from:accounts[0]});
+    expect(verifyIsNameOwner).to.eql(true); // max length
+  });
+
+  it("unsetController(dderp) - a[1](not owner or controller) cannot unset the controller", async () => {
+    let lnrResolverContract = await lnrResolverInstance.deployed();
+    await truffleAssert.reverts(lnrResolverContract.unsetController(web3.utils.utf8ToHex("dderp"), {from:accounts[1]}),"Not yours");
+  });
+
+  it("unsetController(dderp) - a[2](controller) cannot unset the controller", async () => {
+    let lnrResolverContract = await lnrResolverInstance.deployed();
+    await truffleAssert.reverts(lnrResolverContract.unsetController(web3.utils.utf8ToHex("dderp"), {from:accounts[2]}),"Not yours");
+  });
+
+  it("unsetController(dderp) - a[0] can unset the controller", async () => {
+    let lnrResolverContract = await lnrResolverInstance.deployed();
+    await lnrResolverContract.unsetController(web3.utils.utf8ToHex("dderp"), {from:accounts[0]});
+    let controller = await lnrResolverContract.controller.call(web3.utils.utf8ToHex("dderp"));
+    expect(controller).to.eql(zeroAddress);
+  });
+
+  it("verifyIsNameOwner(a[0], dderp) from a[0](owner) - ensure a[0] is nameOwner", async () => {
+    let lnrResolverContract = await lnrResolverInstance.deployed();
+    let verifyIsNameOwner = await lnrResolverContract.verifyIsNameOwner.call(web3.utils.utf8ToHex("dderp"), accounts[0], {from:accounts[0]});
+    expect(verifyIsNameOwner).to.eql(true); // max length
+  });
+
+  it("verifyIsNameOwner(a[2], dderp) from a[2](no longer controller) - ensure a[2] is NOT nameOwner", async () => {
+    let lnrResolverContract = await lnrResolverInstance.deployed();
+    let verifyIsNameOwner = await lnrResolverContract.verifyIsNameOwner.call(web3.utils.utf8ToHex("dderp"), accounts[2], {from:accounts[0]});
+    expect(verifyIsNameOwner).to.eql(false); // max length
+  });
+
+  it("setPrimary(abcabcabcabcabcabcabcabcabcabcab) from a[0] - ensure primary was set", async () => {
+    let lnrResolverContract = await lnrResolverInstance.deployed();
+    await lnrResolverContract.setPrimary(web3.utils.utf8ToHex("abcabcabcabcabcabcabcabcabcabcab"), {from:accounts[0]});
+    let primary = await lnrResolverContract.primary.call(accounts[0], {from:accounts[1]});
+    expect(primary).to.eql(web3.utils.padRight(web3.utils.utf8ToHex("abcabcabcabcabcabcabcabcabcabcab"),64)); // max length
+  });
+
+  it("---ensure resolveAddress records are flushed for a[0] dderp", async () => {
+    let lnrResolverContract = await lnrResolverInstance.deployed();
+    let resolveAddress = await lnrResolverContract.getResolveAddress.call(web3.utils.utf8ToHex("dderp"), {from:accounts[1]});
+    expect(resolveAddress).to.eql(zeroAddress);
+  });
+
 });
